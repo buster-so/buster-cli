@@ -5,7 +5,7 @@ set -e
 # Usage: curl -fsSL https://platform.buster.so/cli | bash
 
 REPO="buster-so/buster-cli"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 BINARY_NAME="buster"
 
 # Detect OS and architecture
@@ -61,6 +61,9 @@ curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/$ARCHIVE"
 # Extract archive
 echo "Extracting..."
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
+
+# Create install directory if it doesn't exist
+mkdir -p "$INSTALL_DIR"
 
 # Install binary
 echo "Installing to $INSTALL_DIR..."

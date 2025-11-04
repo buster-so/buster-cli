@@ -8,12 +8,12 @@ The official command-line interface for Buster.
 
 #### macOS/Linux
 ```bash
-curl -fsSL https://platform.buster.so/install | bash
+curl -fsSL https://platform.buster.so/cli | bash
 ```
 
 #### Windows (PowerShell)
 ```powershell
-irm https://platform.buster.so/install | iex
+irm https://platform.buster.so/cli | iex
 ```
 
 ### Manual Installation

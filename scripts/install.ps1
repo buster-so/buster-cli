@@ -1,5 +1,5 @@
 # Buster CLI Installation Script for Windows
-# Usage: irm https://platform.buster.so/install | iex
+# Usage: irm https://platform.buster.so/cli | iex
 
 $ErrorActionPreference = 'Stop'
 
