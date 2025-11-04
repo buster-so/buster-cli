@@ -1,0 +1,10 @@
+# Releases
+*.tar.gz
+*.zip
+*.sha256
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
