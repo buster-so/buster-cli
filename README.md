@@ -16,13 +16,6 @@ curl -fsSL https://platform.buster.so/install | bash
 irm https://platform.buster.so/install | iex
 ```
 
-### Homebrew (macOS/Linux)
-
-```bash
-brew tap buster-so/buster-homebrew
-brew install buster
-```
-
 ### Manual Installation
 
 Download the latest release for your platform from the [releases page](https://github.com/buster-so/buster-cli/releases).
