@@ -2,7 +2,7 @@
 set -e
 
 # Buster CLI Installation Script
-# Usage: curl -fsSL https://platform.buster.so/install | bash
+# Usage: curl -fsSL https://platform.buster.so/cli | bash
 
 REPO="buster-so/buster-cli"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
