@@ -12,13 +12,13 @@ The official command-line interface for Buster.
 curl -fsSL https://platform.buster.so/cli | bash
 
 # Install specific version
-curl -fsSL https://platform.buster.so/cli | bash -- --version v4.1.0
+curl -fsSL https://platform.buster.so/cli | bash -s -- --version v4.1.0
 
 # Install latest beta version
-curl -fsSL https://platform.buster.so/cli | bash -- --beta
+curl -fsSL https://platform.buster.so/cli | bash -s -- --beta
 
 # Install specific beta version
-curl -fsSL https://platform.buster.so/cli | bash -- --version v4.1.0-beta
+curl -fsSL https://platform.buster.so/cli | bash -s -- --version v4.1.0-beta
 ```
 
 #### Windows (PowerShell)

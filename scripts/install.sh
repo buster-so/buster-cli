@@ -87,30 +87,77 @@ detect_platform() {
 # Get the latest release version (stable or prerelease)
 get_latest_version() {
     local include_prerelease="${1:-false}"
+    local api_response=""
+    local version=""
     
+    # Fetch releases from GitHub API
     if command -v curl >/dev/null 2>&1; then
-        if [[ "$include_prerelease" == "true" ]]; then
-            # Get latest release including prereleases
-            curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/'
-        else
-            # Get latest stable release (first non-prerelease)
-            # Fetch all releases and find first non-prerelease
-            local releases=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
-        fi
+        # Always fetch all releases to have full control over filtering
+        api_response=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=100" 2>&1)
     elif command -v wget >/dev/null 2>&1; then
-        if [[ "$include_prerelease" == "true" ]]; then
-            # Get latest release including prereleases
-            wget -qO- "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/'
-        else
-            # Get latest stable release (first non-prerelease)
-            local releases=$(wget -qO- "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
-        fi
+        # Always fetch all releases to have full control over filtering
+        api_response=$(wget -qO- "https://api.github.com/repos/${REPO}/releases?per_page=100" 2>&1)
     else
         print_error "Neither curl nor wget is available. Please install one of them."
         exit 1
     fi
+    
+    # Check if API call failed
+    if [[ $? -ne 0 ]] || [[ -z "$api_response" ]]; then
+        return 1
+    fi
+    
+    # Try using jq if available (most reliable)
+    if command -v jq >/dev/null 2>&1; then
+        if [[ "$include_prerelease" == "true" ]]; then
+            # Get first release (most recent, including prereleases)
+            version=$(echo "$api_response" | jq -r '.[0].tag_name' 2>/dev/null)
+        else
+            # Get first stable release
+            version=$(echo "$api_response" | jq -r '[.[] | select(.prerelease == false)][0].tag_name' 2>/dev/null)
+        fi
+        if [[ -n "$version" ]] && [[ "$version" != "null" ]]; then
+            echo "$version"
+            return 0
+        fi
+    fi
+    
+    # Try using Python if available (reliable fallback)
+    if command -v python3 >/dev/null 2>&1; then
+        if [[ "$include_prerelease" == "true" ]]; then
+            # Get first release (most recent, including prereleases)
+            version=$(echo "$api_response" | python3 -c "import sys, json; releases = json.load(sys.stdin); print(releases[0]['tag_name'] if releases else '')" 2>/dev/null)
+        else
+            # Get first stable release
+            version=$(echo "$api_response" | python3 -c "import sys, json; releases = json.load(sys.stdin); stable = [r for r in releases if not r.get('prerelease', False)]; print(stable[0]['tag_name'] if stable else '')" 2>/dev/null)
+        fi
+        if [[ -n "$version" ]]; then
+            echo "$version"
+            return 0
+        fi
+    fi
+    
+    # Fallback to grep/sed parsing (less reliable but works without dependencies)
+    if [[ "$include_prerelease" == "true" ]]; then
+        # Get first tag_name (most recent release)
+        version=$(echo "$api_response" | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+    else
+        # Parse JSON manually: find first release with "prerelease": false
+        # Use grep with context to find tag_name near prerelease:false
+        # First try looking backwards (tag_name usually comes before prerelease in JSON)
+        version=$(echo "$api_response" | grep -B 30 '"prerelease":\s*false' | grep '"tag_name"' | tail -1 | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+        # If that didn't work, try looking forwards
+        if [[ -z "$version" ]]; then
+            version=$(echo "$api_response" | grep -A 30 '"prerelease":\s*false' | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')
+        fi
+    fi
+    
+    if [[ -n "$version" ]]; then
+        echo "$version"
+        return 0
+    fi
+    
+    return 1
 }
 
 # Download and install
