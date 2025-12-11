@@ -216,17 +216,12 @@ install_unix() {
     # Make binary executable
     chmod +x "$install_dir/$INSTALL_NAME"
     
-    # Copy node_modules directory if it exists (contains DuckDB native bindings)
-    local node_modules_path="$extract_dir/node_modules"
-    if [[ -d "$node_modules_path" ]]; then
-        print_status "Installing DuckDB native bindings..."
-        # Remove existing node_modules to ensure clean install
-        rm -rf "$install_dir/node_modules"
-        if ! mv "$node_modules_path" "$install_dir/node_modules"; then
-            print_warning "Failed to install DuckDB bindings. DuckDB features may not work."
-        else
-            print_success "DuckDB native bindings installed"
-        fi
+    # Clean up old node_modules if present from previous installations
+    # (DuckDB native bindings are now embedded in the binary)
+    local old_node_modules="$install_dir/node_modules"
+    if [[ -d "$old_node_modules" ]]; then
+        print_status "Cleaning up old DuckDB bindings (now embedded in binary)..."
+        rm -rf "$old_node_modules" 2>/dev/null || true
     fi
     
     print_success "Installed $INSTALL_NAME to $install_dir/$INSTALL_NAME"
@@ -280,17 +275,12 @@ install_windows() {
         exit 1
     fi
     
-    # Copy node_modules directory if it exists (contains DuckDB native bindings)
-    local node_modules_path="$extract_dir/node_modules"
-    if [[ -d "$node_modules_path" ]]; then
-        print_status "Installing DuckDB native bindings..."
-        # Remove existing node_modules to ensure clean install
-        rm -rf "$install_dir/node_modules"
-        if ! mv "$node_modules_path" "$install_dir/node_modules"; then
-            print_warning "Failed to install DuckDB bindings. DuckDB features may not work."
-        else
-            print_success "DuckDB native bindings installed"
-        fi
+    # Clean up old node_modules if present from previous installations
+    # (DuckDB native bindings are now embedded in the binary)
+    local old_node_modules="$install_dir/node_modules"
+    if [[ -d "$old_node_modules" ]]; then
+        print_status "Cleaning up old DuckDB bindings (now embedded in binary)..."
+        rm -rf "$old_node_modules" 2>/dev/null || true
     fi
     
     print_success "Installed $INSTALL_NAME to $install_dir/${INSTALL_NAME}.exe"

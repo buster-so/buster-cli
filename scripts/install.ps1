@@ -134,16 +134,16 @@ try {
     Copy-Item -Path $SOURCE -Destination $DEST -Force
     Write-Host "[SUCCESS] Binary installed" -ForegroundColor Green
 
-    # Install node_modules if present (contains DuckDB native bindings)
-    $NODE_MODULES_SOURCE = Join-Path $TMP_DIR "node_modules"
-    if (Test-Path $NODE_MODULES_SOURCE) {
-        Write-Host "[INFO] Installing DuckDB native bindings..." -ForegroundColor Cyan
-        $NODE_MODULES_DEST = Join-Path $INSTALL_DIR "node_modules"
-        if (Test-Path $NODE_MODULES_DEST) {
-            Remove-Item -Path $NODE_MODULES_DEST -Recurse -Force
+    # Clean up old node_modules if present from previous installations
+    # (DuckDB native bindings are now embedded in the binary)
+    $OLD_NODE_MODULES = Join-Path $INSTALL_DIR "node_modules"
+    if (Test-Path $OLD_NODE_MODULES) {
+        Write-Host "[INFO] Cleaning up old DuckDB bindings (now embedded in binary)..." -ForegroundColor Cyan
+        try {
+            Remove-Item -Path $OLD_NODE_MODULES -Recurse -Force
+        } catch {
+            # Ignore errors during cleanup
         }
-        Copy-Item -Path $NODE_MODULES_SOURCE -Destination $NODE_MODULES_DEST -Recurse -Force
-        Write-Host "[SUCCESS] DuckDB native bindings installed" -ForegroundColor Green
     }
 
     # Add to PATH if not already there
