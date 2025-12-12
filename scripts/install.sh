@@ -92,22 +92,22 @@ get_latest_version() {
         if [[ "$include_prerelease" == "true" ]]; then
             # Get latest release including prereleases - fetch all releases and find first prerelease
             local releases=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+            echo "$releases" | grep -B 6 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
         else
             # Get latest stable release (first non-prerelease)
             # Fetch all releases and find first non-prerelease
             local releases=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+            echo "$releases" | grep -B 6 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
         fi
     elif command -v wget >/dev/null 2>&1; then
         if [[ "$include_prerelease" == "true" ]]; then
             # Get latest release including prereleases - fetch all releases and find first prerelease
             local releases=$(wget -qO- "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+            echo "$releases" | grep -B 6 '"prerelease": true' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
         else
             # Get latest stable release (first non-prerelease)
             local releases=$(wget -qO- "https://api.github.com/repos/${REPO}/releases?per_page=100")
-            echo "$releases" | grep -B 3 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+            echo "$releases" | grep -B 6 '"prerelease": false' | grep '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
         fi
     else
         print_error "Neither curl nor wget is available. Please install one of them."
